@@ -74,13 +74,7 @@ public class ViolationsPublisher extends Recorder {
 
         FilePath htmlPath = new FilePath(new File(build.getProject().getRootDir(), VIOLATIONS));
         FilePath targetPath = new FilePath(new File(build.getRootDir(), VIOLATIONS));
-
         FilePath workspace = build.getWorkspace();
-
-        listener.getLogger().println("htmlPath : " + build.getProject().getRootDir());
-        listener.getLogger().println("targetPath : " + build.getRootDir());
-        listener.getLogger().println("workspace : " + build.getWorkspace());
-
         build.getActions().add(createBuildAction(workspace, targetPath, htmlPath, config, build, listener));
         return true;
     }
@@ -94,7 +88,6 @@ public class ViolationsPublisher extends Recorder {
         report.setBuild(build);
         report.setBuildResult();
         handleRatcheting(report.getBuild().getResult(), report.getTypeReports().values(), listener, config);
-        listener.getLogger().println("config.getAutoUpdateOtherItemTypeConfig : '" + config.getAutoUpdateOtherItemTypeConfig());
         updateTypeConfigOtherItem(report.getTypeReports().values(), listener, config);
         return new ViolationsBuildAction(build, report);
     }
@@ -104,24 +97,24 @@ public class ViolationsPublisher extends Recorder {
      *
      */
     static void updateTypeConfigOtherItem(Collection<TypeReport> typeReports, BuildListener listener, ViolationsConfig config) {
-        listener.getLogger().println(
-                "'AutoUpdateOtherItemTypeConfigParameter : " + config.getAutoUpdateOtherItemTypeConfig());
         if(config.getAutoUpdateOtherItemTypeConfig() != null && !(config.getAutoUpdateOtherItemTypeConfig().isEmpty())){
-            AbstractProject<?,?> item = Jenkins.getInstance().getItemByFullName(config.getAutoUpdateOtherItemTypeConfig(),AbstractProject.class);
-            DescribableList rootPublishers = item.getPublishersList();
-            if(rootPublishers != null){
-                ViolationsConfig violationsConfigOtherItem = (ViolationsConfig)rootPublishers.get(ViolationsConfig.class);
-                if(violationsConfigOtherItem != null){
-                    for(TypeReport typeReport : typeReports){
-                        TypeConfig typeConfig = config.getTypeConfigs().get(typeReport.getType());
-                        if(violationsConfigOtherItem.getTypeConfigs().containsKey(typeReport.getType())){
-                            TypeConfig typeConfigOtherItem = violationsConfigOtherItem.getTypeConfigs().get(typeReport.getType());
-                            typeConfigOtherItem.setFail(typeConfig.getFail());
-                            typeConfigOtherItem.setMax(typeConfig.getMax());
-                            typeConfigOtherItem.setMin(typeConfig.getMin());
-                            typeConfigOtherItem.setPattern(typeConfig.getPattern());
-                            typeConfigOtherItem.setUnstable(typeConfigOtherItem.getUnstable());
-                            typeConfigOtherItem.setUsePattern(typeConfig.isUsePattern());
+            AbstractProject<?,?> item = Jenkins.getInstance().getItemByFullName(config.getAutoUpdateOtherItemTypeConfig(), AbstractProject.class);
+            if(item != null){
+                DescribableList rootPublishers = item.getPublishersList();
+                if(rootPublishers != null){
+                    ViolationsConfig violationsConfigOtherItem = (ViolationsConfig)rootPublishers.get(ViolationsConfig.class);
+                    if(violationsConfigOtherItem != null){
+                        for(TypeReport typeReport : typeReports){
+                            TypeConfig typeConfig = config.getTypeConfigs().get(typeReport.getType());
+                            if(violationsConfigOtherItem.getTypeConfigs().containsKey(typeReport.getType())){
+                                TypeConfig typeConfigOtherItem = violationsConfigOtherItem.getTypeConfigs().get(typeReport.getType());
+                                typeConfigOtherItem.setFail(typeConfig.getFail());
+                                typeConfigOtherItem.setMax(typeConfig.getMax());
+                                typeConfigOtherItem.setMin(typeConfig.getMin());
+                                typeConfigOtherItem.setPattern(typeConfig.getPattern());
+                                typeConfigOtherItem.setUnstable(typeConfigOtherItem.getUnstable());
+                                typeConfigOtherItem.setUsePattern(typeConfig.isUsePattern());
+                            }
                         }
                     }
                 }
