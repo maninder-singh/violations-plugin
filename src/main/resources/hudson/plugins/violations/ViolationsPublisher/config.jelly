@@ -48,6 +48,7 @@
     value=
     " padding-left: 0.3em;  padding-right: 0.3em; padding-top:0em; padding-bottom:0em;"/>
 
+
   <f:entry
     help="/plugin/violations/table-help.html"
     >
@@ -198,4 +199,7 @@
     <f:checkbox name="config.autoUpdateUnstable" checked="${config.autoUpdateUnstable}" />
   </f:entry>
 
+  <f:entry title="Update other item type config">
+    <f:textbox name="config.autoUpdateOtherItemTypeConfig" value="${config.autoUpdateOtherItemTypeConfig}" />
+  </f:entry>
 </j:jelly>
