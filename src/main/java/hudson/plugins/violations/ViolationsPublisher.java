@@ -6,11 +6,7 @@ import static java.lang.Boolean.TRUE;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
+import hudson.model.*;
 import hudson.plugins.violations.ViolationsReport.TypeReport;
 import hudson.plugins.violations.hudson.ViolationsFreestyleDescriptor;
 import hudson.tasks.BuildStepDescriptor;
@@ -23,6 +19,8 @@ import java.io.IOException;
 import java.util.Collection;
 
 import com.google.common.annotations.VisibleForTesting;
+import hudson.util.DescribableList;
+import jenkins.model.Jenkins;
 
 /**
  * Generats HTML and XML reports from checkstyle, pmd and findbugs report xml
@@ -79,6 +77,10 @@ public class ViolationsPublisher extends Recorder {
 
         FilePath workspace = build.getWorkspace();
 
+        listener.getLogger().println("htmlPath : " + build.getProject().getRootDir());
+        listener.getLogger().println("targetPath : " + build.getRootDir());
+        listener.getLogger().println("workspace : " + build.getWorkspace());
+
         build.getActions().add(createBuildAction(workspace, targetPath, htmlPath, config, build, listener));
         return true;
     }
@@ -92,7 +94,39 @@ public class ViolationsPublisher extends Recorder {
         report.setBuild(build);
         report.setBuildResult();
         handleRatcheting(report.getBuild().getResult(), report.getTypeReports().values(), listener, config);
+        listener.getLogger().println("config.getAutoUpdateOtherItemTypeConfig : '" + config.getAutoUpdateOtherItemTypeConfig());
+        updateTypeConfigOtherItem(report.getTypeReports().values(), listener, config);
         return new ViolationsBuildAction(build, report);
+    }
+
+    /**
+     * Update other item type config with current item type config.
+     *
+     */
+    static void updateTypeConfigOtherItem(Collection<TypeReport> typeReports, BuildListener listener, ViolationsConfig config) {
+        listener.getLogger().println(
+                "'AutoUpdateOtherItemTypeConfigParameter : " + config.getAutoUpdateOtherItemTypeConfig());
+        if(config.getAutoUpdateOtherItemTypeConfig() != null && !(config.getAutoUpdateOtherItemTypeConfig().isEmpty())){
+            AbstractProject<?,?> item = Jenkins.getInstance().getItemByFullName(config.getAutoUpdateOtherItemTypeConfig(),AbstractProject.class);
+            DescribableList rootPublishers = item.getPublishersList();
+            if(rootPublishers != null){
+                ViolationsConfig violationsConfigOtherItem = (ViolationsConfig)rootPublishers.get(ViolationsConfig.class);
+                if(violationsConfigOtherItem != null){
+                    for(TypeReport typeReport : typeReports){
+                        TypeConfig typeConfig = config.getTypeConfigs().get(typeReport.getType());
+                        if(violationsConfigOtherItem.getTypeConfigs().containsKey(typeReport.getType())){
+                            TypeConfig typeConfigOtherItem = violationsConfigOtherItem.getTypeConfigs().get(typeReport.getType());
+                            typeConfigOtherItem.setFail(typeConfig.getFail());
+                            typeConfigOtherItem.setMax(typeConfig.getMax());
+                            typeConfigOtherItem.setMin(typeConfig.getMin());
+                            typeConfigOtherItem.setPattern(typeConfig.getPattern());
+                            typeConfigOtherItem.setUnstable(typeConfigOtherItem.getUnstable());
+                            typeConfigOtherItem.setUsePattern(typeConfig.isUsePattern());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
