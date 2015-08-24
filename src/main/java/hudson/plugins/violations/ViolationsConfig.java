@@ -35,7 +35,10 @@ public class ViolationsConfig implements Cloneable, Serializable {
     /** Activation flags for different kinds of ratcheting */
     private boolean autoUpdateMax;
     private boolean autoUpdateUnstable;
-    
+
+    /** The (optional) item name is used to update violation parameter based on current build success */
+    private String autoUpdateOtherItemTypeConfig;
+
     /**
      * The constructor fot eh violations config.
      * This creates a config with default values.
@@ -95,6 +98,7 @@ public class ViolationsConfig implements Cloneable, Serializable {
         ret.encoding          = encoding;
         ret.autoUpdateMax     = autoUpdateMax;
         ret.autoUpdateUnstable = autoUpdateUnstable;
+        ret.autoUpdateOtherItemTypeConfig = autoUpdateOtherItemTypeConfig;
         return ret;
     }
 
@@ -221,6 +225,23 @@ public class ViolationsConfig implements Cloneable, Serializable {
      */
     public void setEncoding(String encoding) {
         this.encoding = encoding;
+    }
+
+
+    /**
+     * Get the autoUpdateOtherItemTypeConfig value
+     * @return the autoUpdateOtherItemTypeConfig value.
+     */
+    public String getAutoUpdateOtherItemTypeConfig() {
+        return autoUpdateOtherItemTypeConfig;
+    }
+
+    /**
+     * Set the autoUpdateOtherItemTypeConfig value.
+     * @param autoUpdateOtherItemTypeConfig the value to use
+     */
+    public void setAutoUpdateOtherItemTypeConfig(String autoUpdateOtherItemTypeConfig) {
+        this.autoUpdateOtherItemTypeConfig = autoUpdateOtherItemTypeConfig;
     }
 
     /**
