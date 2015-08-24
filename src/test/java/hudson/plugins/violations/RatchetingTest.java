@@ -72,7 +72,6 @@ public class RatchetingTest extends JenkinsRule {
     public void testThatMaxCanBeUpdated() {
         BuildListener listener = mock(BuildListener.class);
         when(listener.getLogger()).thenReturn(out);
-
         Collection<TypeReport> typeReports = newArrayList(type(CHECKSTYLE, 7));
         ViolationsConfig config = new ViolationsConfig();
         config.setAutoUpdateMax(TRUE);
